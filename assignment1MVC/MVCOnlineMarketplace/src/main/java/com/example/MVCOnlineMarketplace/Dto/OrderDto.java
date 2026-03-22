@@ -13,6 +13,6 @@ import lombok.NoArgsConstructor;
 public class OrderDto implements Dto<Order>{
     private long id;
     private long userId;
-    private long
+
 
 }
