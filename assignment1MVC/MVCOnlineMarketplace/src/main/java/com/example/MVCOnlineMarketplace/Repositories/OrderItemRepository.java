@@ -1,13 +1,9 @@
 package com.example.MVCOnlineMarketplace.Repositories;
 
-import com.example.MVCOnlineMarketplace.Model.Product;
+import com.example.MVCOnlineMarketplace.Model.OrderItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 }

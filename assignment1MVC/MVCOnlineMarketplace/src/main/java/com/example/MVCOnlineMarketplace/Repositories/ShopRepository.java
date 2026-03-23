@@ -1,7 +1,7 @@
 package com.example.MVCOnlineMarketplace.Repositories;
 
+import com.example.MVCOnlineMarketplace.Model.Shop;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-@org.springframework.stereotype.Repository
-public interface Repository<T> extends JpaRepository<T, Long> {
+public interface ShopRepository extends JpaRepository<Shop, Long> {
 }
