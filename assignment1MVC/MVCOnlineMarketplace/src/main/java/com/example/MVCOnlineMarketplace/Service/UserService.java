@@ -1,18 +1,22 @@
 package com.example.MVCOnlineMarketplace.Service;
 
 import com.example.MVCOnlineMarketplace.Dto.UserDto;
-import com.example.MVCOnlineMarketplace.Model.User;
-import org.springframework.stereotype.Service;
+import com.example.MVCOnlineMarketplace.Dto.UserRegistrationDto;
 
+import java.util.List;
 import java.util.Optional;
 
-@Service
 public interface UserService {
-    public Optional<UserDto> findByUsername(String username);
-    public Optional<UserDto> findById(long id);
-    public Optional<UserDto> findByEmail(String email);
-    public void save(UserDto user);
-    public void delete(UserDto user);
-    public boolean existsByUsername(String username);
-    public UserDto authenticate(String username, String password);
+    Optional<UserDto> findByUsername(String username);
+    Optional<UserDto> findById(long id);
+    Optional<UserDto> findByEmail(String email);
+    void save(UserDto user);
+    void delete(UserDto user);
+    boolean existsByUsername(String username);
+    UserDto authenticate(String username, String password);
+    UserDto register(UserRegistrationDto registrationDto);
+    List<UserDto> getAllUsers();
+    List<UserDto> getFiltered(String column, String value, String sortBy, boolean ascending);
+    void updateUserRole(long userId, String role);
+    void deleteUserById(long id);
 }
