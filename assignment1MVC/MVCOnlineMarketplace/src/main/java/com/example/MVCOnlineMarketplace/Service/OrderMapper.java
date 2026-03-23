@@ -4,6 +4,7 @@ import com.example.MVCOnlineMarketplace.Dto.OrderDto;
 import com.example.MVCOnlineMarketplace.Model.Order;
 import com.example.MVCOnlineMarketplace.Model.OrderItem;
 import com.example.MVCOnlineMarketplace.Model.Product;
+import com.example.MVCOnlineMarketplace.Model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,17 +22,18 @@ public class OrderMapper {
                         .stream()
                         .map(OrderItemMapper::mapToDto)
                         .collect(Collectors.toList()))
-                .isPaid(order.isPaid()).
-                build();
+                .isPaid(order.isPaid())
+                .build();
     }
 
-    public static Order mapFromDto(OrderDto dto, Map<Long, Product> productsById) {
+    public static Order mapFromDto(OrderDto dto, Map<Long, Product> productsById, User user) {
         Order order = Order.builder()
                 .orderId(dto.getId())
-                .user(UserMapper.mapFromUserDto(dto.getUserDto()))
+                .user(user)
                 .totalPrice(dto.getTotalPrice())
                 .isPaid(dto.isPaid())
                 .build();
+
         List<OrderItem> items = dto.getOrderItems().stream()
                 .map(itemDto -> OrderItemMapper.mapFromDto(
                         itemDto,

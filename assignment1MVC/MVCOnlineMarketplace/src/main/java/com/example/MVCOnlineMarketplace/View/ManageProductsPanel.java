@@ -12,6 +12,8 @@ import java.util.List;
 public class ManageProductsPanel extends JPanel {
 
     private final ProductController productController;
+    private final Long restrictedShopId;
+
     private JTable productTable;
     private DefaultTableModel tableModel;
 
@@ -19,18 +21,30 @@ public class ManageProductsPanel extends JPanel {
     private JTextField descField;
     private JTextField priceField;
     private JTextField shopIdField;
+    private JButton saveBtn;
+    private JButton clearBtn;
 
-    public ManageProductsPanel(ProductController productController) {
+    private JTextField filterField;
+    private JComboBox<String> filterColCombo;
+    private JComboBox<String> sortColCombo;
+    private JComboBox<String> sortDirCombo;
+
+    private long editingProductId = 0;
+
+    private static final String[] FILTER_LABELS = {"Name", "Description", "Price", "Shop ID"};
+    private static final String[] FILTER_KEYS   = {"name", "description", "price", "shopId"};
+
+    public ManageProductsPanel(ProductController productController, Long restrictedShopId) {
         this.productController = productController;
+        this.restrictedShopId = restrictedShopId;
         setLayout(new BorderLayout());
         initUI();
         refreshTable();
     }
 
     private void initUI() {
-        // --- Form Panel (Top - For adding new products) ---
-        JPanel formPanel = new JPanel(new GridLayout(5, 2, 5, 5));
-        formPanel.setBorder(BorderFactory.createTitledBorder("Add New Product"));
+        JPanel formPanel = new JPanel(new GridLayout(6, 2, 5, 5));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Product Details"));
 
         formPanel.add(new JLabel("  Product Name:"));
         nameField = new JTextField();
@@ -44,30 +58,52 @@ public class ManageProductsPanel extends JPanel {
         priceField = new JTextField();
         formPanel.add(priceField);
 
-        formPanel.add(new JLabel("  Shop ID (Required):"));
+        formPanel.add(new JLabel("  Shop ID:"));
         shopIdField = new JTextField();
+        if (restrictedShopId != null) {
+            shopIdField.setText(String.valueOf(restrictedShopId));
+            shopIdField.setEditable(false);
+        }
         formPanel.add(shopIdField);
 
-        JButton addBtn = new JButton("Save Product");
-        addBtn.addActionListener(e -> addProduct());
-        formPanel.add(new JLabel()); // Empty spacer to align the button
-        formPanel.add(addBtn);
+        saveBtn = new JButton("Save Product");
+        saveBtn.addActionListener(e -> saveProduct());
+        formPanel.add(new JLabel());
+        formPanel.add(saveBtn);
+
+        clearBtn = new JButton("Clear / New");
+        clearBtn.addActionListener(e -> clearForm());
+        formPanel.add(new JLabel());
+        formPanel.add(clearBtn);
 
         add(formPanel, BorderLayout.NORTH);
 
-        // --- Table Panel (Center - For viewing existing products) ---
         String[] columns = {"ID", "Name", "Description", "Price", "Shop ID"};
-        tableModel = new DefaultTableModel(columns, 0);
+        tableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         productTable = new JTable(tableModel);
-        add(new JScrollPane(productTable), BorderLayout.CENTER);
+        productTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        productTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                loadSelectedRowIntoForm();
+            }
+        });
 
-        // --- Action Panel (Bottom - For Refreshing and Deleting) ---
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(buildFilterBar(), BorderLayout.NORTH);
+        centerPanel.add(new JScrollPane(productTable), BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
+
         JPanel actionPanel = new JPanel();
 
         JButton refreshBtn = new JButton("Refresh List");
         refreshBtn.addActionListener(e -> refreshTable());
 
-        JButton deleteBtn = new JButton("Delete Selected Product");
+        JButton deleteBtn = new JButton("Delete Selected");
         deleteBtn.setForeground(Color.RED);
         deleteBtn.addActionListener(e -> deleteSelectedProduct());
 
@@ -76,9 +112,75 @@ public class ManageProductsPanel extends JPanel {
         add(actionPanel, BorderLayout.SOUTH);
     }
 
+    private JPanel buildFilterBar() {
+        JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 3));
+        bar.add(new JLabel("Filter:"));
+        filterField = new JTextField(15);
+        bar.add(filterField);
+        bar.add(new JLabel("by:"));
+        filterColCombo = new JComboBox<>(FILTER_LABELS);
+        bar.add(filterColCombo);
+        bar.add(new JLabel("Sort by:"));
+        sortColCombo = new JComboBox<>(FILTER_LABELS);
+        bar.add(sortColCombo);
+        sortDirCombo = new JComboBox<>(new String[]{"Asc", "Desc"});
+        bar.add(sortDirCombo);
+        JButton applyBtn = new JButton("Apply");
+        applyBtn.addActionListener(e -> applyFilter());
+        bar.add(applyBtn);
+        JButton resetBtn = new JButton("Reset");
+        resetBtn.addActionListener(e -> { filterField.setText(""); refreshTable(); });
+        bar.add(resetBtn);
+        return bar;
+    }
+
+    private void applyFilter() {
+        String value = filterField.getText().trim();
+        String column = FILTER_KEYS[filterColCombo.getSelectedIndex()];
+        String sortBy = FILTER_KEYS[sortColCombo.getSelectedIndex()];
+        boolean ascending = sortDirCombo.getSelectedIndex() == 0;
+        tableModel.setRowCount(0);
+        List<ProductDto> products = productController.getFiltered(restrictedShopId, column, value, sortBy, ascending);
+        for (ProductDto p : products) {
+            tableModel.addRow(new Object[]{
+                    p.getId(), p.getName(), p.getDescription(),
+                    "$" + p.getPrice(),
+                    p.getShopId() != null ? p.getShopId() : "N/A"
+            });
+        }
+    }
+
+    private void loadSelectedRowIntoForm() {
+        int selectedRow = productTable.getSelectedRow();
+        if (selectedRow < 0) return;
+
+        editingProductId = (long) tableModel.getValueAt(selectedRow, 0);
+        nameField.setText((String) tableModel.getValueAt(selectedRow, 1));
+        descField.setText((String) tableModel.getValueAt(selectedRow, 2));
+        String rawPrice = (String) tableModel.getValueAt(selectedRow, 3);
+        priceField.setText(rawPrice.replace("$", ""));
+        Object shopIdVal = tableModel.getValueAt(selectedRow, 4);
+        if (restrictedShopId == null) {
+            shopIdField.setText(shopIdVal instanceof Long ? String.valueOf(shopIdVal) : "");
+        }
+        saveBtn.setText("Update Product");
+    }
+
+    private void clearForm() {
+        editingProductId = 0;
+        nameField.setText("");
+        descField.setText("");
+        priceField.setText("");
+        if (restrictedShopId == null) shopIdField.setText("");
+        productTable.clearSelection();
+        saveBtn.setText("Save Product");
+    }
+
     private void refreshTable() {
-        tableModel.setRowCount(0); // Clear the table
-        List<ProductDto> products = productController.getAllProducts();
+        tableModel.setRowCount(0);
+        List<ProductDto> products = restrictedShopId != null
+                ? productController.getProductsByShopId(restrictedShopId)
+                : productController.getAllProducts();
 
         for (ProductDto p : products) {
             tableModel.addRow(new Object[]{
@@ -89,35 +191,33 @@ public class ManageProductsPanel extends JPanel {
                     p.getShopId() != null ? p.getShopId() : "N/A"
             });
         }
+        clearForm();
     }
 
-    private void addProduct() {
+    private void saveProduct() {
         try {
-            // Validate inputs
             if (nameField.getText().trim().isEmpty() || priceField.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Name and Price are required fields.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Build the DTO
+            Long shopId = restrictedShopId != null
+                    ? restrictedShopId
+                    : (shopIdField.getText().trim().isEmpty() ? null : Long.parseLong(shopIdField.getText().trim()));
+
             ProductDto dto = ProductDto.builder()
+                    .id(editingProductId)
                     .name(nameField.getText().trim())
                     .description(descField.getText().trim())
                     .price(new BigDecimal(priceField.getText().trim()))
-                    .shopId(shopIdField.getText().trim().isEmpty() ? null : Long.parseLong(shopIdField.getText().trim()))
+                    .shopId(shopId)
                     .build();
 
-            // Pass to the Controller
             productController.saveProduct(dto);
 
-            // Refresh UI and clear fields
+            String msg = editingProductId > 0 ? "Product updated successfully!" : "Product saved successfully!";
             refreshTable();
-            nameField.setText("");
-            descField.setText("");
-            priceField.setText("");
-            shopIdField.setText("");
-
-            JOptionPane.showMessageDialog(this, "Product successfully saved!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, msg, "Success", JOptionPane.INFORMATION_MESSAGE);
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Please enter a valid number for Price and Shop ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
@@ -129,11 +229,8 @@ public class ManageProductsPanel extends JPanel {
     private void deleteSelectedProduct() {
         int selectedRow = productTable.getSelectedRow();
         if (selectedRow >= 0) {
-            // Confirm deletion
             int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete this product?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
-
             if (confirm == JOptionPane.YES_OPTION) {
-                // ID is in the first column (index 0)
                 long productId = (long) tableModel.getValueAt(selectedRow, 0);
                 productController.deleteProduct(productId);
                 refreshTable();
