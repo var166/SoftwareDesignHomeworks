@@ -25,6 +25,10 @@ public class ExportService {
 
     public String exportProducts(String format) {
         List<ProductDto> products = productService.getAllProducts();
+        return exportProducts(products, format);
+    }
+
+    public String exportProducts(List<ProductDto> products, String format) {
         ExportStrategy strategy = strategies.get(format.toLowerCase());
         if (strategy == null) {
             throw new IllegalArgumentException("Unknown export format: " + format);

@@ -43,4 +43,8 @@ public class ProductController {
     public String exportProducts(String format) {
         return exportService.exportProducts(format);
     }
+
+    public String exportProducts(List<ProductDto> products, String format) {
+        return exportService.exportProducts(products, format);
+    }
 }

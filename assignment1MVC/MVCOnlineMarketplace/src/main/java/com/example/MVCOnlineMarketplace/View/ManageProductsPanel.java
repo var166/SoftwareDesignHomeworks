@@ -32,6 +32,7 @@ public class ManageProductsPanel extends JPanel {
     private JComboBox<String> sortDirCombo;
 
     private long editingProductId = 0;
+    private List<ProductDto> currentProducts = new java.util.ArrayList<>();
 
     private static final String[] FILTER_LABELS = {"Name", "Description", "Price", "Shop ID"};
     private static final String[] FILTER_KEYS   = {"name", "description", "price", "shopId"};
@@ -155,8 +156,8 @@ public class ManageProductsPanel extends JPanel {
         String sortBy = FILTER_KEYS[sortColCombo.getSelectedIndex()];
         boolean ascending = sortDirCombo.getSelectedIndex() == 0;
         tableModel.setRowCount(0);
-        List<ProductDto> products = productController.getFiltered(restrictedShopId, column, value, sortBy, ascending);
-        for (ProductDto p : products) {
+        currentProducts = productController.getFiltered(restrictedShopId, column, value, sortBy, ascending);
+        for (ProductDto p : currentProducts) {
             tableModel.addRow(new Object[]{
                     p.getId(), p.getName(), p.getDescription(),
                     "$" + p.getPrice(),
@@ -193,11 +194,11 @@ public class ManageProductsPanel extends JPanel {
 
     private void refreshTable() {
         tableModel.setRowCount(0);
-        List<ProductDto> products = restrictedShopId != null
+        currentProducts = restrictedShopId != null
                 ? productController.getProductsByShopId(restrictedShopId)
                 : productController.getAllProducts();
 
-        for (ProductDto p : products) {
+        for (ProductDto p : currentProducts) {
             tableModel.addRow(new Object[]{
                     p.getId(),
                     p.getName(),
@@ -249,7 +250,7 @@ public class ManageProductsPanel extends JPanel {
         int result = fileChooser.showSaveDialog(this);
         if (result != JFileChooser.APPROVE_OPTION) return;
         try {
-            String content = productController.exportProducts(format);
+            String content = productController.exportProducts(currentProducts, format);
             try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile())) {
                 writer.write(content);
             }
