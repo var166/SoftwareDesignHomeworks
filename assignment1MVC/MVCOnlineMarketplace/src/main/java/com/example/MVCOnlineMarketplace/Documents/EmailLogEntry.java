@@ -23,4 +23,5 @@ public class EmailLogEntry {
     private String status;
     private String errorMessage;
     private LocalDateTime sentAt;
+
 }

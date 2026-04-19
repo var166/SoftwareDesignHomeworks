@@ -18,16 +18,18 @@ public class MainFrame extends JFrame {
     private final ShopController shopController;
     private final OrderController orderController;
     private final UserController userController;
+    private final NotificationController notificationController;
 
     private JPanel headerPanel;
     private JTabbedPane tabbedPane;
 
     public MainFrame(ProductController productController, ShopController shopController,
-                     OrderController orderController, UserController userController) {
+                     OrderController orderController, UserController userController, NotificationController notificationController) {
         this.productController = productController;
         this.shopController = shopController;
         this.orderController = orderController;
         this.userController = userController;
+        this.notificationController = notificationController;
 
         setTitle("MVC Online Marketplace");
         setSize(900, 600);
@@ -85,6 +87,7 @@ public class MainFrame extends JFrame {
             tabbedPane.addTab("Manage Products", new ManageProductsPanel(productController, null));
             tabbedPane.addTab("Manage Shops", new ManageShopsPanel(shopController));
             tabbedPane.addTab("Manage Users", new ManageUsersPanel(userController));
+            tabbedPane.addTab("Logs", new LogsPanel(notificationController));
         }
 
         add(tabbedPane, BorderLayout.CENTER);

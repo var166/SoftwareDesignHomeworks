@@ -9,6 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class NotificationService {
@@ -53,5 +54,8 @@ public class NotificationService {
                 .errorMessage(errorMessage)
                 .sentAt(LocalDateTime.now())
                 .build());
+    }
+    public List<EmailLogEntry> getEmailLogs(){
+        return emailLogRepository.findAll();
     }
 }
