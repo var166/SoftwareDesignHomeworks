@@ -1,6 +1,7 @@
 package com.example.MVCOnlineMarketplace.Controller;
 
 import com.example.MVCOnlineMarketplace.Dto.ProductDto;
+import com.example.MVCOnlineMarketplace.Export.ExportService;
 import com.example.MVCOnlineMarketplace.Service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,10 +12,12 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ExportService exportService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ExportService exportService) {
         this.productService = productService;
+        this.exportService = exportService;
     }
 
     public List<ProductDto> getAllProducts() {
@@ -35,5 +38,9 @@ public class ProductController {
 
     public void deleteProduct(long id) {
         productService.deleteProduct(id);
+    }
+
+    public String exportProducts(String format) {
+        return exportService.exportProducts(format);
     }
 }

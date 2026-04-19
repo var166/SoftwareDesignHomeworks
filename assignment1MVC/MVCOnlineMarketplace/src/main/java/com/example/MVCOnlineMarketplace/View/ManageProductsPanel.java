@@ -4,8 +4,10 @@ import com.example.MVCOnlineMarketplace.Controller.ProductController;
 import com.example.MVCOnlineMarketplace.Dto.ProductDto;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -107,8 +109,21 @@ public class ManageProductsPanel extends JPanel {
         deleteBtn.setForeground(Color.RED);
         deleteBtn.addActionListener(e -> deleteSelectedProduct());
 
+        JButton exportJsonBtn = new JButton("Export JSON");
+        exportJsonBtn.addActionListener(e -> exportProducts("json", "json", "JSON Files"));
+
+        JButton exportXmlBtn = new JButton("Export XML");
+        exportXmlBtn.addActionListener(e -> exportProducts("xml", "xml", "XML Files"));
+
+        JButton exportCsvBtn = new JButton("Export CSV");
+        exportCsvBtn.addActionListener(e -> exportProducts("csv", "csv", "CSV Files"));
+
         actionPanel.add(refreshBtn);
         actionPanel.add(deleteBtn);
+        actionPanel.add(new JSeparator(SwingConstants.VERTICAL));
+        actionPanel.add(exportJsonBtn);
+        actionPanel.add(exportXmlBtn);
+        actionPanel.add(exportCsvBtn);
         add(actionPanel, BorderLayout.SOUTH);
     }
 
@@ -223,6 +238,26 @@ public class ManageProductsPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please enter a valid number for Price and Shop ID.", "Input Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error saving product: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportProducts(String format, String extension, String description) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Export");
+        fileChooser.setSelectedFile(new java.io.File("products." + extension));
+        fileChooser.setFileFilter(new FileNameExtensionFilter(description, extension));
+        int result = fileChooser.showSaveDialog(this);
+        if (result != JFileChooser.APPROVE_OPTION) return;
+        try {
+            String content = productController.exportProducts(format);
+            try (FileWriter writer = new FileWriter(fileChooser.getSelectedFile())) {
+                writer.write(content);
+            }
+            JOptionPane.showMessageDialog(this, "Exported successfully to " + fileChooser.getSelectedFile().getName(),
+                    "Export", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(),
+                    "Export Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 

@@ -1,6 +1,8 @@
 package com.example.MVCOnlineMarketplace.Config;
 
-import org.springframework.amqp.core.*;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.QueueBuilder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -11,31 +13,11 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE          = "app.exchange";
-    public static final String EMAIL_QUEUE       = "app.email.queue";
-    public static final String EMAIL_ROUTING_KEY = "app.email";
-
-    private static TopicExchange exchangeInstance;
+    public static final String QUEUE_NAME = "product.events";
 
     @Bean
-    public TopicExchange exchange() {
-        if (exchangeInstance == null) {
-            exchangeInstance = new TopicExchange(EXCHANGE);
-        }
-        return exchangeInstance;
-    }
-
-    @Bean
-    public Queue emailQueue() {
-        return QueueBuilder.durable(EMAIL_QUEUE).build();
-    }
-
-    @Bean
-    public Binding emailBinding(Queue emailQueue, TopicExchange exchange) {
-        return BindingBuilder
-                .bind(emailQueue)
-                .to(exchange)
-                .with(EMAIL_ROUTING_KEY);
+    public Queue productEventsQueue() {
+        return QueueBuilder.durable(QUEUE_NAME).build();
     }
 
     @Bean

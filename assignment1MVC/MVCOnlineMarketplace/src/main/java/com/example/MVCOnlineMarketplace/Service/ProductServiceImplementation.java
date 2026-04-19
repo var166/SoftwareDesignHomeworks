@@ -1,18 +1,22 @@
 package com.example.MVCOnlineMarketplace.Service;
 
 import com.example.MVCOnlineMarketplace.Dto.ProductDto;
+import com.example.MVCOnlineMarketplace.Event.DomainEvent;
+import com.example.MVCOnlineMarketplace.Messaging.EmailEventPublisher;
 import com.example.MVCOnlineMarketplace.Model.Product;
 import com.example.MVCOnlineMarketplace.Model.Shop;
 import com.example.MVCOnlineMarketplace.Repositories.ProductRepository;
 import com.example.MVCOnlineMarketplace.Repositories.ShopRepository;
+import com.example.MVCOnlineMarketplace.Security.UserSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,11 +25,15 @@ public class ProductServiceImplementation implements ProductService {
 
     private final ProductRepository productRepository;
     private final ShopRepository shopRepository;
+    private final EmailEventPublisher emailEventPublisher;
 
     @Autowired
-    public ProductServiceImplementation(ProductRepository productRepository, ShopRepository shopRepository) {
+    public ProductServiceImplementation(ProductRepository productRepository,
+                                        ShopRepository shopRepository,
+                                        EmailEventPublisher emailEventPublisher) {
         this.productRepository = productRepository;
         this.shopRepository = shopRepository;
+        this.emailEventPublisher = emailEventPublisher;
     }
 
     @Override
@@ -76,22 +84,46 @@ public class ProductServiceImplementation implements ProductService {
 
     @Override
     public void saveProduct(ProductDto productDto) {
+        boolean isUpdate = productDto.getId() > 0;
         Product product = ProductMapper.mapFromProductDto(productDto);
         if (productDto.getShopId() != null) {
             Shop shop = shopRepository.findById(productDto.getShopId())
                     .orElseThrow(() -> new RuntimeException("Shop not found"));
             product.setShop(shop);
         }
-        productRepository.save(product);
+        Product saved = productRepository.save(product);
+
+        String eventType = isUpdate ? "PRODUCT_UPDATED" : "PRODUCT_CREATED";
+        emailEventPublisher.publish(new DomainEvent(
+                UUID.randomUUID().toString(),
+                eventType,
+                "Product",
+                saved.getId(),
+                resolveCurrentUserEmail(),
+                LocalDateTime.now()
+        ));
     }
 
     @Override
     public void deleteProduct(long id) {
         productRepository.deleteById(id);
+        emailEventPublisher.publish(new DomainEvent(
+                UUID.randomUUID().toString(),
+                "PRODUCT_DELETED",
+                "Product",
+                id,
+                resolveCurrentUserEmail(),
+                LocalDateTime.now()
+        ));
     }
 
     @Override
     public Optional<ProductDto> getProductById(long id) {
         return productRepository.findById(id).map(ProductMapper::mapToProductDto);
+    }
+
+    private String resolveCurrentUserEmail() {
+        UserSession session = UserSession.getInstance();
+        return session.isLoggedIn() ? session.getCurrentUser().getEmail() : null;
     }
 }
