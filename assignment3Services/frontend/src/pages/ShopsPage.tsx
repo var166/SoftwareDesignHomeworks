@@ -2,16 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAll, create, deleteShop, type ShopResponse } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 export default function ShopsPage() {
   const { t } = useTranslation()
@@ -34,7 +25,7 @@ export default function ShopsPage() {
     try {
       const res = await getAll(sortBy || undefined, direction)
       setShops(res.data)
-    } catch (e) { console.error(e) }
+    } catch {}
   }
 
   useEffect(() => { load() }, [sortBy, direction])
@@ -47,13 +38,13 @@ export default function ShopsPage() {
       await create(form.name, form.address, form.phone, form.email, form.description, +form.adminId)
       setForm({ name: '', address: '', phone: '', email: '', description: '', adminId: '' })
       load()
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
   }
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
     e.stopPropagation()
     try { await deleteShop(id); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   return (

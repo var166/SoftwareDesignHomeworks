@@ -8,16 +8,7 @@ import {
   UpdateDescriptionCommand,
   DeleteProductCommand
 } from '../commands/ProductCommands'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 const exportProducts = (
   format: 'json' | 'xml' | 'csv',
@@ -64,7 +55,7 @@ export default function ProductsPage() {
         : await getAll(sortBy || undefined, direction)
       setProducts(res.data)
       setError('')
-    } catch (e) { setError(extractError(e)) }
+    } catch {}
   }
 
   useEffect(() => { load() }, [sortBy, direction])
@@ -77,24 +68,24 @@ export default function ProductsPage() {
     try {
       await new CreateProductCommand(form.name, form.description, +form.price, +form.shopId, userEmail || undefined, load).execute()
       setForm({ name: '', description: '', price: '', shopId: '' })
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
   }
 
   const handleUpdatePrice = async (id: number) => {
     const val = editPrice[id]
     if (isNaN(Number(val)) || val === undefined || val === '') { alert('Price must be a valid number'); return }
     try { await new UpdatePriceCommand(id, +val, userEmail || undefined, load).execute() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleUpdateDesc = async (id: number) => {
     try { await new UpdateDescriptionCommand(id, editDesc[id], userEmail || undefined, load).execute() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleDelete = async (id: number) => {
     try { await new DeleteProductCommand(id, load).execute() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   return (

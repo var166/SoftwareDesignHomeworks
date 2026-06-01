@@ -2,16 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAll, getByUserId, getByIsPaid, getByUserIdAndIsPaid, markAsPaid, deleteOrder, type OrderResponse } from '../api/ordersApi'
 import Navbar from '../components/Navbar'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 export default function OrdersPage() {
   const { t } = useTranslation()
@@ -37,7 +28,7 @@ export default function OrdersPage() {
         res = await getAll(sort, direction)
       }
       setOrders(res.data)
-    } catch (e) { console.error(e) }
+    } catch {}
   }
 
   useEffect(() => { load() }, [sortBy, direction])
@@ -45,13 +36,13 @@ export default function OrdersPage() {
   const handleMarkPaid = async (orderId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     try { await markAsPaid(orderId); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleDelete = async (orderId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     try { await deleteOrder(orderId); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   return (

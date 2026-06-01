@@ -1,16 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAll, getByRole, updateRole, deleteUser, type UserResponse } from '../api/usersApi'
 import Navbar from '../components/Navbar'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 const ROLES = ['ALL', 'USER', 'ADMIN', 'STORE_MANAGER']
 const SORT_FIELDS = ['username', 'email']
@@ -29,23 +20,21 @@ export default function UsersPage() {
         ? await getAll(sortBy || undefined, direction)
         : await getByRole(role, sortBy || undefined, direction)
       setUsers(res.data)
-    } catch (e) {
-      console.error(e)
-    }
+    } catch {}
   }
 
   useEffect(() => { load() }, [role, sortBy, direction])
 
   const handleDelete = async (id: number) => {
     try { await deleteUser(id); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleRoleChange = async (id: number) => {
     const newRole = roleEdits[id]
     if (!newRole) return
     try { await updateRole(id, newRole); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   return (

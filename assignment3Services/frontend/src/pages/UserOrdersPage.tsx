@@ -4,16 +4,7 @@ import { getAll as getProducts, type ProductResponse } from '../api/productsApi'
 import { getAll as getShops } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
 import { getUserInfo } from '../utils/auth'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 interface AvailableProduct {
   product: ProductResponse
@@ -28,7 +19,7 @@ export default function UserOrdersPage() {
   const [availableProducts, setAvailableProducts] = useState<AvailableProduct[]>([])
   const [quantities, setQuantities] = useState<Record<number, string>>({})
   const [loadingProducts, setLoadingProducts] = useState(false)
-  const [error, setError] = useState('')
+  const [error] = useState('')
   const user = getUserInfo()
 
   const load = async () => {
@@ -36,7 +27,7 @@ export default function UserOrdersPage() {
     try {
       const res = await getByUserId(user.id)
       setOrders(res.data)
-    } catch (e) { setError(extractError(e)) }
+    } catch {}
   }
 
   useEffect(() => { load() }, [])
@@ -59,7 +50,7 @@ export default function UserOrdersPage() {
         .map(p => ({ product: p, stock: stockMap[p.id] }))
 
       setAvailableProducts(available)
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
     finally { setLoadingProducts(false) }
   }
 
@@ -72,13 +63,13 @@ export default function UserOrdersPage() {
   const handleMarkPaid = async (orderId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     try { await markAsPaid(orderId); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleDelete = async (orderId: number, e: React.MouseEvent) => {
     e.stopPropagation()
     try { await deleteOrder(orderId); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -101,7 +92,7 @@ export default function UserOrdersPage() {
       setShowCreate(false)
       setQuantities({})
       load()
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
   }
 
   const total = availableProducts.reduce((sum, { product }) => {

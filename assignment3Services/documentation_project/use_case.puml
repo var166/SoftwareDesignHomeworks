@@ -1,0 +1,61 @@
+@startuml use_case
+
+left to right direction
+
+actor Visitor
+actor User
+actor "Store Manager" as SM
+actor Admin
+
+rectangle "Online Marketplace" {
+    usecase "View landing page" as UC1
+    usecase "Browse shops" as UC2
+    usecase "Register" as UC3
+    usecase "Login" as UC4
+
+    usecase "View own orders" as UC5
+    usecase "Place an order" as UC6
+    usecase "Mark order as paid" as UC7
+    usecase "Use real-time chat" as UC8
+
+    usecase "Manage shop inventory" as UC9
+    usecase "Add / remove products from shop" as UC10
+    usecase "Update product stock" as UC11
+
+    usecase "Manage users" as UC12
+    usecase "Manage products" as UC13
+    usecase "Manage shops" as UC14
+    usecase "Manage orders" as UC15
+    usecase "Export products" as UC16
+}
+
+Visitor --> UC1
+Visitor --> UC2
+Visitor --> UC3
+Visitor --> UC4
+
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC1
+User --> UC2
+
+SM --> UC9
+SM --> UC10
+SM --> UC11
+SM --> UC8
+SM --> UC1
+SM --> UC2
+
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+Admin --> UC16
+Admin --> UC8
+
+UC10 .> UC9 : <<include>>
+UC11 .> UC9 : <<include>>
+
+@enduml

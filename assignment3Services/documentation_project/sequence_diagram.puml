@@ -1,0 +1,37 @@
+@startuml sequence_diagram
+
+actor User as U
+participant "React Frontend" as FE
+participant "nginx" as NX
+participant "orders-service" as OS
+participant "products-service" as PS
+participant "RabbitMQ" as MQ
+participant "notifications-service" as NS
+
+U -> FE : open "New Order" form
+FE -> NX : GET /api/products/findAll\n+ GET /api/shops/findAll
+NX -> PS : forward
+PS --> NX : 200 products[]
+NX -> NX : forward to shop-service
+NX --> FE : shops[] with productStock
+
+FE --> U : display products with stock
+
+U -> FE : select quantities, click "Place Order"
+FE -> NX : POST /api/orders\n{userId, items[]}
+NX -> OS : forward (JWT validated by nginx)
+
+OS -> OS : validate items, compute totalPrice
+OS -> OS : save Order + OrderItems (PostgreSQL)
+OS -> MQ : publish ORDER_CREATED event\n{userId, totalPrice, items}
+
+OS --> NX : 200 OK
+NX --> FE : 200 OK
+FE --> U : order list refreshed
+
+MQ -> NS : deliver ORDER_CREATED message
+NS -> NS : look up user email\n(from payload)
+NS -> NS : compose email
+NS --> U : send email notification\n"Your order has been placed"
+
+@enduml

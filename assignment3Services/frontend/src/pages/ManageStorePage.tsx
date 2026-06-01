@@ -2,16 +2,7 @@ import { useEffect, useState } from 'react'
 import { getByAdminId, addProduct, removeProduct, updateStock, incrementStock, decrementStock, type ShopResponse } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
 import { getUserInfo } from '../utils/auth'
-import axios from 'axios'
 import { useTranslation } from 'react-i18next'
-
-const extractError = (e: unknown): string => {
-  if (axios.isAxiosError(e)) {
-    const d = e.response?.data
-    return String(d?.message ?? d ?? `HTTP ${e.response?.status}`)
-  }
-  return 'Unexpected error'
-}
 
 export default function ManageStorePage() {
   const { t } = useTranslation()
@@ -28,7 +19,7 @@ export default function ManageStorePage() {
       const res = await getByAdminId(user.id)
       if (res.data.length === 0) { setNoShop(true); return }
       setShop(res.data[0])
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
   }
 
   useEffect(() => { load() }, [])
@@ -42,7 +33,7 @@ export default function ManageStorePage() {
       await addProduct(shop.id, +newProductId, +newStock)
       setNewProductId(''); setNewStock('')
       load()
-    } catch (e) { alert(extractError(e)) }
+    } catch {}
   }
 
   const handleUpdateStock = async (productId: string) => {
@@ -50,25 +41,25 @@ export default function ManageStorePage() {
     const val = stockEdits[productId]
     if (isNaN(Number(val)) || val === undefined) { alert('Stock must be a number'); return }
     try { await updateStock(shop.id, +productId, +val); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleIncrement = async (productId: string) => {
     if (!shop) return
     try { await incrementStock(shop.id, +productId, 1); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleDecrement = async (productId: string) => {
     if (!shop) return
     try { await decrementStock(shop.id, +productId, 1); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   const handleRemove = async (productId: string) => {
     if (!shop) return
     try { await removeProduct(shop.id, +productId); load() }
-    catch (e) { alert(extractError(e)) }
+    catch {}
   }
 
   if (noShop) return (
