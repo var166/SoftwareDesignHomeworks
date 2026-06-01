@@ -54,7 +54,7 @@
 \tableofcontents
 \newpage
 
-% -------------------------------------------------------
+%:----------------------------------------------------
 \section{Problem definition}
 
 The goal of this project is to extend the online marketplace application built in the previous
@@ -77,7 +77,7 @@ Deliverables for this assignment:
     \item A pull request assigned to the course reviewer.
 \end{itemize}
 
-% -------------------------------------------------------
+%:----------------------------------------------------
 \section{Analysis phase - Use cases \& requirements}
 
 \subsection{Functional requirements}
@@ -122,7 +122,7 @@ JSON, CSV or XML format.
     \label{fig:usecase}
 \end{figure}
 
-% -------------------------------------------------------
+%:----------------------------------------------------
 \section{Design phase}
 
 \subsection{Architecture overview}
@@ -134,12 +134,12 @@ service based on the URL path.
 
 The services are:
 \begin{itemize}
-    \item \texttt{users-service} --- handles registration, login and user management. Uses PostgreSQL.
-    \item \texttt{products-service} --- manages product CRUD and export. Uses PostgreSQL.
-    \item \texttt{shop-service} --- manages shop data and product stock. Uses PostgreSQL.
-    \item \texttt{orders-service} --- manages order creation and lifecycle. Uses PostgreSQL.
-    \item \texttt{notifications-service} --- listens to RabbitMQ events and sends email notifications. Uses MongoDB.
-    \item \texttt{chat-service} --- provides a WebSocket endpoint for real-time messaging.
+    \item \texttt{users-service}: handles registration, login and user management. Uses PostgreSQL.
+    \item \texttt{products-service}: manages product CRUD and export. Uses PostgreSQL.
+    \item \texttt{shop-service}: manages shop data and product stock. Uses PostgreSQL.
+    \item \texttt{orders-service}: manages order creation and lifecycle. Uses PostgreSQL.
+    \item \texttt{notifications-service}: listens to RabbitMQ events and sends email notifications. Uses MongoDB.
+    \item \texttt{chat-service}: provides a WebSocket endpoint for real-time messaging.
 \end{itemize}
 
 The frontend is a React + TypeScript single-page application built with Vite. It communicates
@@ -148,9 +148,7 @@ the users-service issues a token on login, and the frontend attaches it to every
 request via an axios interceptor.
 
 The main advantage of this architecture is that each service can be developed, deployed and
-scaled independently. The main downside is the added operational complexity: services need to
-be coordinated, and cross-service data access requires additional HTTP calls or messaging rather
-than simple joins.
+scaled independently. 
 
 \subsection{Entity-relationship diagram}
 
@@ -211,19 +209,19 @@ and the preference is persisted in localStorage.
 
 The following design patterns are used in the implementation:
 
-\textit{Command pattern (behavioral)} --- used in all four backend services. Each write operation
+\textit{Command pattern (behavioral)}: used in all four backend services. Each write operation
 (create, update, delete) is encapsulated in a Command class. The \texttt{CommandInvoker} runs
 the command. This separates the request from its execution and makes the controller code thin.
 
-\textit{Repository pattern (structural)} --- each service uses separate repository interfaces for
+\textit{Repository pattern (structural)}: each service uses separate repository interfaces for
 read and write operations (\texttt{IProductCommandService} / \texttt{IProductQueryService}), which
 mirrors the CQRS concept.
 
-\textit{Interceptor pattern (behavioral)} --- used on the frontend. The axios interceptors act as
+\textit{Interceptor pattern (behavioral)}: used on the frontend. The axios interceptors act as
 middleware: the request interceptor adds the auth header, the response interceptor handles errors
 uniformly so individual components do not need their own error handling logic.
 
-\textit{Observer / Message broker pattern (behavioral)} --- the notifications-service subscribes
+\textit{Observer / Message broker pattern (behavioral)}: the notifications-service subscribes
 to RabbitMQ queues. Services that publish events do not need to know who consumes them, which
 keeps the services loosely coupled.
 
@@ -251,43 +249,43 @@ email to the user.
     \label{fig:seq}
 \end{figure}
 
-% -------------------------------------------------------
+%:----------------------------------------------------
 \section{Implementation phase - Application}
 
 \subsection{Tools and technologies}
 
 \begin{itemize}
-    \item Java 17 with Spring Boot 4 --- used for all backend services. Spring Web MVC handles
+    \item Java 17 with Spring Boot  used for all backend services. Spring Web MVC handles
     REST endpoints, Spring Data JPA manages persistence, Spring Security provides JWT-based
     authentication in the users-service.
 
-    \item PostgreSQL --- relational database used by users, products, shops and orders services.
+    \item PostgreSQL  relational database used by users, products, shops and orders services.
     Each service has its own database to maintain independence.
 
-    \item MongoDB --- used by the notifications-service to store event logs. A document database
+    \item MongoDB  used by the notifications-service to store event logs. A document database
     fits well here since the event payloads have variable structure.
 
-    \item RabbitMQ --- message broker used to decouple services. The products and orders services
+    \item RabbitMQ  message broker used to decouple services. The products and orders services
     publish events; the notifications-service consumes them.
 
-    \item React 18 + TypeScript + Vite --- the frontend stack. Vite was chosen for fast
+    \item React 18 + TypeScript + Vite  the frontend stack. Vite was chosen for fast
     development builds. TypeScript catches type errors early, which helps when working with
     multiple API response shapes.
 
-    \item axios --- HTTP client for the frontend, chosen over fetch because interceptors are
+    \item axios  HTTP client for the frontend, chosen over fetch because interceptors are
     cleaner to implement for the centralized error handling and auth header injection.
 
-    \item react-i18next --- internationalization library. Integrates well with React hooks and
+    \item react-i18next  internationalization library. Integrates well with React hooks and
     supports runtime language switching without a page reload.
 
-    \item Docker + Docker Compose --- all services and infrastructure are containerized. This
+    \item Docker + Docker Compose  all services and infrastructure are containerized. This
     makes the setup reproducible and eliminates environment differences between machines.
 
-    \item nginx --- reverse proxy that routes frontend requests to the correct backend service
+    \item nginx  reverse proxy that routes frontend requests to the correct backend service
     based on path prefixes (\texttt{/api/users}, \texttt{/api/products}, etc.) and handles
     WebSocket proxying for the chat service.
 
-    \item JWT (jjwt 0.12) --- used for stateless authentication. The token encodes the username
+    \item JWT (jjwt 0.12)  used for stateless authentication. The token encodes the username
     and role, which allows each service to verify requests independently without calling the
     users-service on every request.
 \end{itemize}
@@ -299,22 +297,22 @@ folder and a root \texttt{docker-compose.yml}.
 
 Each backend service follows the same internal structure:
 \begin{itemize}
-    \item \texttt{controller/} --- REST controllers (split into command and query controllers)
-    \item \texttt{service/} --- business logic interfaces and implementations
-    \item \texttt{repository/} --- Spring Data JPA repositories
-    \item \texttt{model/} --- JPA entities
-    \item \texttt{command/} --- command objects and invoker
-    \item \texttt{dto/} --- request/response DTOs
-    \item \texttt{config/} --- Spring configuration (CORS, RabbitMQ, security)
+    \item \texttt{controller/} : REST controllers (split into command and query controllers)
+    \item \texttt{service/}: business logic interfaces and implementations
+    \item \texttt{repository/}: Spring Data JPA repositories
+    \item \texttt{model/}: JPA entities
+    \item \texttt{command/}: command objects and invoker
+    \item \texttt{dto/}: request/response DTOs
+    \item \texttt{config/}: Spring configuration (CORS, RabbitMQ, security)
 \end{itemize}
 
 The frontend is organized as:
 \begin{itemize}
-    \item \texttt{src/pages/} --- one component per route
-    \item \texttt{src/api/} --- axios wrappers for each service, plus the central client
-    \item \texttt{src/components/} --- shared UI components (Navbar, ProtectedRoute, LanguageSwitcher)
-    \item \texttt{src/locales/} --- translation files
-    \item \texttt{src/utils/} --- auth helpers (JWT decode, localStorage access)
+    \item \texttt{src/pages/}: one component per route
+    \item \texttt{src/api/}: axios wrappers for each service, plus the central client
+    \item \texttt{src/components/}: shared UI components (Navbar, ProtectedRoute, LanguageSwitcher)
+    \item \texttt{src/locales/}: translation files
+    \item \texttt{src/utils/}: auth helpers (JWT decode, localStorage access)
 \end{itemize}
 
 \subsection{User manual}
@@ -340,7 +338,7 @@ connection and appear immediately for all connected users without refreshing the
 The language switcher in the navbar lets users toggle between English and Romanian. The
 preference is saved and restored on the next visit.
 
-% -------------------------------------------------------
+%:----------------------------------------------------
 \section{Testing and validation}
 
 Unit tests are written with JUnit 5 and Mockito and cover the service layer of the backend
