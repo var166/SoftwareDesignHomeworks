@@ -29,7 +29,7 @@ class ProductCommandServiceTest {
         Product saved = Product.builder().name("Widget").description("desc").price(new BigDecimal("9.99")).shopId(1L).build();
         when(productCommandRepository.save(any(Product.class))).thenReturn(saved);
 
-        Product result = productCommandService.create("Widget", "desc", new BigDecimal("9.99"), 1L);
+        Product result = productCommandService.create("Widget", "desc", new BigDecimal("9.99"), 1L, "test@test.com");
 
         verify(productCommandRepository).save(any(Product.class));
         assertThat(result.getName()).isEqualTo("Widget");
@@ -40,7 +40,7 @@ class ProductCommandServiceTest {
     void updatePrice_productExists_updatesAndReturnsTrue() {
         when(productCommandRepository.findById(1L)).thenReturn(Optional.of(new Product()));
 
-        boolean result = productCommandService.updatePrice(1L, new BigDecimal("14.99"));
+        boolean result = productCommandService.updatePrice(1L, new BigDecimal("14.99"), "test@test.com");
 
         verify(productCommandRepository).updatePrice(1L, new BigDecimal("14.99"));
         assertThat(result).isTrue();
@@ -50,7 +50,7 @@ class ProductCommandServiceTest {
     void updatePrice_productNotFound_returnsFalse() {
         when(productCommandRepository.findById(99L)).thenReturn(Optional.empty());
 
-        boolean result = productCommandService.updatePrice(99L, new BigDecimal("14.99"));
+        boolean result = productCommandService.updatePrice(99L, new BigDecimal("14.99"),"test@test.com");
 
         verify(productCommandRepository, never()).updatePrice(anyLong(), any());
         assertThat(result).isFalse();
@@ -60,7 +60,7 @@ class ProductCommandServiceTest {
     void updateDescription_productExists_updatesAndReturnsTrue() {
         when(productCommandRepository.findById(1L)).thenReturn(Optional.of(new Product()));
 
-        boolean result = productCommandService.updateDescription(1L, "new desc");
+        boolean result = productCommandService.updateDescription(1L, "new desc","test@test.com");
 
         verify(productCommandRepository).updateDescription(1L, "new desc");
         assertThat(result).isTrue();
@@ -70,7 +70,7 @@ class ProductCommandServiceTest {
     void updateDescription_productNotFound_returnsFalse() {
         when(productCommandRepository.findById(99L)).thenReturn(Optional.empty());
 
-        boolean result = productCommandService.updateDescription(99L, "new desc");
+        boolean result = productCommandService.updateDescription(99L, "new desc","test@test.com");
 
         verify(productCommandRepository, never()).updateDescription(anyLong(), anyString());
         assertThat(result).isFalse();

@@ -9,6 +9,7 @@ import OrdersPage from './pages/OrdersPage'
 import CreateOrderPage from './pages/CreateOrderPage'
 import UserOrdersPage from './pages/UserOrdersPage'
 import ManageStorePage from './pages/ManageStorePage'
+import ChatPage from './pages/ChatPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
@@ -17,6 +18,13 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
+
+        {/* All authenticated users */}
+        <Route path="/chat" element={
+          <ProtectedRoute roles={['USER', 'STORE_MANAGER', 'ADMIN']}>
+            <ChatPage />
+          </ProtectedRoute>
+        } />
 
         {/* USER role */}
         <Route path="/my-orders" element={

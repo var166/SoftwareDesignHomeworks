@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAll as getProducts, type ProductResponse } from '../api/productsApi'
 import { getAll as getShops, type ShopResponse } from '../api/shopsApi'
-import { getToken, getUserInfo } from '../utils/auth'
+import { getUserInfo } from '../utils/auth'
+import { useTranslation } from 'react-i18next'
 
 export default function LandingPage() {
+  const { t } = useTranslation()
   const [products, setProducts] = useState<ProductResponse[]>([])
   const [shops, setShops] = useState<ShopResponse[]>([])
   const [error, setError] = useState('')
@@ -12,8 +14,8 @@ export default function LandingPage() {
   const user = getUserInfo()
 
   useEffect(() => {
-    getProducts().then(r => setProducts(r.data)).catch(() => setError('Failed to load products'))
-    getShops().then(r => setShops(r.data)).catch(() => setError('Failed to load shops'))
+    getProducts().then(r => setProducts(r.data)).catch(() => setError(t('landing.failedProducts')))
+    getShops().then(r => setShops(r.data)).catch(() => setError(t('landing.failedShops')))
   }, [])
 
   const goToDashboard = () => {
@@ -26,12 +28,12 @@ export default function LandingPage() {
   return (
     <div style={page}>
       <header style={header}>
-        <span style={logo}>Marketplace</span>
+        <span style={logo}>{t('landing.logo')}</span>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           {user && <span style={badge}>{user.username} · {user.userRole}</span>}
           {user
-            ? <button style={btn} onClick={goToDashboard}>Dashboard</button>
-            : <button style={btn} onClick={() => navigate('/login')}>Login</button>}
+            ? <button style={btn} onClick={goToDashboard}>{t('landing.dashboard')}</button>
+            : <button style={btn} onClick={() => navigate('/login')}>{t('landing.login')}</button>}
         </div>
       </header>
 
@@ -39,7 +41,7 @@ export default function LandingPage() {
 
       <main style={main}>
         <section style={section}>
-          <h2 style={sectionTitle}>Products</h2>
+          <h2 style={sectionTitle}>{t('landing.productsSection')}</h2>
           <div style={grid}>
             {products.map(p => (
               <div key={p.id} style={card}>
@@ -49,22 +51,22 @@ export default function LandingPage() {
                 <div style={cardMeta}>Shop #{p.shopId}</div>
               </div>
             ))}
-            {products.length === 0 && <p style={{ color: '#a6adc8' }}>No products found.</p>}
+            {products.length === 0 && <p style={{ color: '#a6adc8' }}>{t('landing.noProducts')}</p>}
           </div>
         </section>
 
         <section style={section}>
-          <h2 style={sectionTitle}>Shops</h2>
+          <h2 style={sectionTitle}>{t('landing.shopsSection')}</h2>
           <div style={grid}>
             {shops.map(s => (
               <div key={s.id} style={card}>
                 <div style={cardName}>{s.name}</div>
                 <div style={cardDesc}>{s.address}</div>
-                <div style={cardMeta}>{Object.keys(s.productStock || {}).length} products in stock</div>
+                <div style={cardMeta}>{t('landing.productsInStock', { count: Object.keys(s.productStock || {}).length })}</div>
                 <div style={cardMeta}>{s.email}</div>
               </div>
             ))}
-            {shops.length === 0 && <p style={{ color: '#a6adc8' }}>No shops found.</p>}
+            {shops.length === 0 && <p style={{ color: '#a6adc8' }}>{t('landing.noShops')}</p>}
           </div>
         </section>
       </main>

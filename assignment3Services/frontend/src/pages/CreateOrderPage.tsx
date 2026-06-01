@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createOrder, type OrderItemRequest } from '../api/ordersApi'
 import Navbar from '../components/Navbar'
+import { useTranslation } from 'react-i18next'
 
 export default function CreateOrderPage() {
+  const { t } = useTranslation()
   const [userId, setUserId] = useState('')
   const [items, setItems] = useState<OrderItemRequest[]>([{ productId: 0, quantity: 1, pricePerUnit: 0 }])
   const navigate = useNavigate()
@@ -25,33 +27,33 @@ export default function CreateOrderPage() {
     <div style={page}>
       <Navbar />
       <div style={content}>
-        <h2 style={{ marginBottom: '1.5rem' }}>Create Order</h2>
+        <h2 style={{ marginBottom: '1.5rem' }}>{t('createOrder.title')}</h2>
         <form onSubmit={handleSubmit}>
-          <label style={label}>User ID</label>
-          <input style={input} placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
+          <label style={label}>{t('createOrder.userId')}</label>
+          <input style={input} placeholder={t('createOrder.userIdPlaceholder')} value={userId} onChange={e => setUserId(e.target.value)} />
 
-          <h3 style={{ margin: '1.5rem 0 0.75rem' }}>Items</h3>
+          <h3 style={{ margin: '1.5rem 0 0.75rem' }}>{t('createOrder.items')}</h3>
           {items.map((item, idx) => (
             <div key={idx} style={rowStyle}>
-              <input style={input} placeholder="Product ID" value={item.productId || ''}
+              <input style={input} placeholder={t('createOrder.productIdPlaceholder')} value={item.productId || ''}
                 onChange={e => updateRow(idx, 'productId', e.target.value)} />
-              <input style={input} placeholder="Qty" value={item.quantity}
+              <input style={input} placeholder={t('createOrder.qtyPlaceholder')} value={item.quantity}
                 onChange={e => updateRow(idx, 'quantity', e.target.value)} />
-              <input style={input} placeholder="Price/unit" value={item.pricePerUnit || ''}
+              <input style={input} placeholder={t('createOrder.priceUnitPlaceholder')} value={item.pricePerUnit || ''}
                 onChange={e => updateRow(idx, 'pricePerUnit', e.target.value)} />
               <button type="button" style={dangerBtn} onClick={() => removeRow(idx)}>✕</button>
             </div>
           ))}
 
-          <button type="button" style={{ ...btn, marginTop: '0.5rem' }} onClick={addRow}>+ Add Item</button>
+          <button type="button" style={{ ...btn, marginTop: '0.5rem' }} onClick={addRow}>{t('createOrder.addItem')}</button>
 
           <div style={{ margin: '1.5rem 0', fontSize: 18, fontWeight: 700 }}>
-            Total: ${total.toFixed(2)}
+            {t('createOrder.total')}{total.toFixed(2)}
           </div>
 
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <button style={btn} type="submit">Create Order</button>
-            <button style={dangerBtn} type="button" onClick={() => navigate('/orders')}>Cancel</button>
+            <button style={btn} type="submit">{t('createOrder.create')}</button>
+            <button style={dangerBtn} type="button" onClick={() => navigate('/orders')}>{t('createOrder.cancel')}</button>
           </div>
         </form>
       </div>

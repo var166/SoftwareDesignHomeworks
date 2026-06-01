@@ -1,10 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { getUserInfo, logout as logoutUser } from '../utils/auth'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function Navbar() {
   const navigate = useNavigate()
   const user = getUserInfo()
   const role = user?.userRole
+  const { t } = useTranslation()
 
   const doLogout = () => {
     logoutUser()
@@ -13,21 +16,23 @@ export default function Navbar() {
 
   return (
     <nav style={nav}>
-      <Link to="/" style={link}>Home</Link>
-      {role === 'USER' && <Link to="/my-orders" style={link}>My Orders</Link>}
+      <Link to="/" style={link}>{t('nav.home')}</Link>
+      {role === 'USER' && <Link to="/my-orders" style={link}>{t('nav.orders')}</Link>}
       {role === 'STORE_MANAGER' && <>
-        <Link to="/manage-store" style={link}>My Shop</Link>
-        <Link to="/my-orders" style={link}>My Orders</Link>
-        <Link to="/shops" style={link}>Browse Shops</Link>
+        <Link to="/manage-store" style={link}>{t('nav.myShop')}</Link>
+        <Link to="/my-orders" style={link}>{t('nav.orders')}</Link>
+        <Link to="/shops" style={link}>{t('nav.browseShops')}</Link>
       </>}
       {role === 'ADMIN' && <>
-        <Link to="/users" style={link}>Users</Link>
-        <Link to="/products" style={link}>Products</Link>
-        <Link to="/shops" style={link}>Shops</Link>
-        <Link to="/orders" style={link}>Orders</Link>
+        <Link to="/users" style={link}>{t('nav.users')}</Link>
+        <Link to="/products" style={link}>{t('nav.products')}</Link>
+        <Link to="/shops" style={link}>{t('nav.shops')}</Link>
+        <Link to="/orders" style={link}>{t('nav.orders')}</Link>
       </>}
+      {user && <Link to="/chat" style={link}>{t('nav.chat')}</Link>}
       {user && <span style={userBadge}>{user.username} · {role}</span>}
-      <button onClick={doLogout} style={{ marginLeft: 'auto', ...logoutBtn }}>Logout</button>
+      <LanguageSwitcher />
+      <button onClick={doLogout} style={{ marginLeft: 'auto', ...logoutBtn }}>{t('nav.logout')}</button>
     </nav>
   )
 }

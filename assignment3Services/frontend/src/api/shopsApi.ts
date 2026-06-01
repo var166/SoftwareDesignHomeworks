@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'http://localhost:8083' })
+const api = axios.create({ baseURL: '' })
 
 export interface ShopResponse {
   id: number

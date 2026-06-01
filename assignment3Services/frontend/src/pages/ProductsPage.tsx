@@ -9,6 +9,7 @@ import {
   DeleteProductCommand
 } from '../commands/ProductCommands'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -29,12 +30,13 @@ const exportProducts = (
   if (sortBy) { params.set('sortBy', sortBy); params.set('direction', direction) }
   if (minPrice && maxPrice) { params.set('min', minPrice); params.set('max', maxPrice) }
   const a = document.createElement('a')
-  a.href = `http://localhost:8082/api/products/export?${params.toString()}`
+  a.href = `/api/products/export?${params.toString()}`
   a.download = `products.${format}`
   a.click()
 }
 
 export default function ProductsPage() {
+  const { t } = useTranslation()
   const [products, setProducts] = useState<ProductResponse[]>([])
   const [sortBy, setSortBy] = useState('')
   const [direction, setDirection] = useState<'asc' | 'desc'>('asc')
@@ -100,9 +102,9 @@ export default function ProductsPage() {
       <Navbar />
       <div style={content}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2>Products</h2>
+          <h2>{t('products.title')}</h2>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <span style={{ color: '#a6adc8', fontSize: 13, alignSelf: 'center' }}>Export:</span>
+            <span style={{ color: '#a6adc8', fontSize: 13, alignSelf: 'center' }}>{t('products.export')}</span>
             {(['json', 'csv', 'xml'] as const).map(fmt => (
               <button key={fmt} style={exportBtn} onClick={() => exportProducts(fmt, sortBy, direction, minPrice, maxPrice)}>{fmt.toUpperCase()}</button>
             ))}
@@ -110,42 +112,42 @@ export default function ProductsPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-          <label style={{ color: '#a6adc8', fontSize: 13 }}>Notification email:</label>
-          <input style={{ ...input, width: 260 }} placeholder="your@email.com" value={userEmail}
+          <label style={{ color: '#a6adc8', fontSize: 13 }}>{t('products.notificationEmail')}</label>
+          <input style={{ ...input, width: 260 }} placeholder={t('products.emailPlaceholder')} value={userEmail}
             onChange={e => setUserEmail(e.target.value)} />
         </div>
 
         {error && <div style={errorBox}>{error}</div>}
 
         <form onSubmit={handleCreate} style={formRow}>
-          <input style={input} placeholder="Name" value={form.name}
+          <input style={input} placeholder={t('products.namePlaceholder')} value={form.name}
             onChange={e => setForm(p => ({ ...p, name: e.target.value }))} />
-          <input style={input} placeholder="Description" value={form.description}
+          <input style={input} placeholder={t('products.descriptionPlaceholder')} value={form.description}
             onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
-          <input style={input} placeholder="Price" value={form.price}
+          <input style={input} placeholder={t('products.pricePlaceholder')} value={form.price}
             onChange={e => setForm(p => ({ ...p, price: e.target.value }))} />
-          <input style={input} placeholder="Shop ID" value={form.shopId}
+          <input style={input} placeholder={t('products.shopIdPlaceholder')} value={form.shopId}
             onChange={e => setForm(p => ({ ...p, shopId: e.target.value }))} />
-          <button style={btn} type="submit">+ Create</button>
+          <button style={btn} type="submit">{t('products.create')}</button>
         </form>
 
         <div style={filterBar}>
-          <input style={{ ...input, width: 100 }} placeholder="Min price" value={minPrice} onChange={e => setMinPrice(e.target.value)} />
-          <input style={{ ...input, width: 100 }} placeholder="Max price" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
-          <button style={btn} onClick={load}>Filter</button>
+          <input style={{ ...input, width: 100 }} placeholder={t('products.minPrice')} value={minPrice} onChange={e => setMinPrice(e.target.value)} />
+          <input style={{ ...input, width: 100 }} placeholder={t('products.maxPrice')} value={maxPrice} onChange={e => setMaxPrice(e.target.value)} />
+          <button style={btn} onClick={load}>{t('products.filter')}</button>
           <select style={select} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="">No sort</option>
-            <option value="name">Name</option>
-            <option value="price">Price</option>
+            <option value="">{t('products.noSort')}</option>
+            <option value="name">{t('products.sortName')}</option>
+            <option value="price">{t('products.sortPrice')}</option>
           </select>
           <button style={btn} onClick={() => setDirection(d => d === 'asc' ? 'desc' : 'asc')}>
-            {direction === 'asc' ? '↑ ASC' : '↓ DESC'}
+            {direction === 'asc' ? t('products.asc') : t('products.desc')}
           </button>
         </div>
 
         <table style={table}>
           <thead>
-            <tr>{['ID', 'Name', 'Description', 'Price', 'ShopId', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('products.colId'), t('products.colName'), t('products.colDescription'), t('products.colPrice'), t('products.colShopId'), t('products.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {products.map(p => (
@@ -155,16 +157,16 @@ export default function ProductsPage() {
                 <td style={td}>
                   <input style={{ ...input, width: 140 }} value={editDesc[p.id] ?? p.description}
                     onChange={e => setEditDesc(d => ({ ...d, [p.id]: e.target.value }))} />
-                  <button style={smallBtn} onClick={() => handleUpdateDesc(p.id)}>Save</button>
+                  <button style={smallBtn} onClick={() => handleUpdateDesc(p.id)}>{t('products.save')}</button>
                 </td>
                 <td style={td}>
                   <input style={{ ...input, width: 80 }} value={editPrice[p.id] ?? p.price}
                     onChange={e => setEditPrice(d => ({ ...d, [p.id]: e.target.value }))} />
-                  <button style={smallBtn} onClick={() => handleUpdatePrice(p.id)}>Save</button>
+                  <button style={smallBtn} onClick={() => handleUpdatePrice(p.id)}>{t('products.save')}</button>
                 </td>
                 <td style={td}>{p.shopId}</td>
                 <td style={td}>
-                  <button style={dangerBtn} onClick={() => handleDelete(p.id)}>Delete</button>
+                  <button style={dangerBtn} onClick={() => handleDelete(p.id)}>{t('products.delete')}</button>
                 </td>
               </tr>
             ))}

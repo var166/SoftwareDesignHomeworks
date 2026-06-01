@@ -3,6 +3,7 @@ import { getByAdminId, addProduct, removeProduct, updateStock, incrementStock, d
 import Navbar from '../components/Navbar'
 import { getUserInfo } from '../utils/auth'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -13,6 +14,7 @@ const extractError = (e: unknown): string => {
 }
 
 export default function ManageStorePage() {
+  const { t } = useTranslation()
   const [shop, setShop] = useState<ShopResponse | null>(null)
   const [noShop, setNoShop] = useState(false)
   const [newProductId, setNewProductId] = useState('')
@@ -73,7 +75,7 @@ export default function ManageStorePage() {
     <div style={page}>
       <Navbar />
       <div style={content}>
-        <p style={{ color: '#a6adc8' }}>You don't manage any shop yet. Ask an admin to assign one.</p>
+        <p style={{ color: '#a6adc8' }}>{t('manageStore.noShop')}</p>
       </div>
     </div>
   )
@@ -81,7 +83,7 @@ export default function ManageStorePage() {
   if (!shop) return (
     <div style={page}>
       <Navbar />
-      <div style={content}><p style={{ color: '#a6adc8' }}>Loading...</p></div>
+      <div style={content}><p style={{ color: '#a6adc8' }}>{t('manageStore.loading')}</p></div>
     </div>
   )
 
@@ -92,16 +94,16 @@ export default function ManageStorePage() {
         <h2 style={{ marginBottom: '0.25rem' }}>{shop.name}</h2>
         <p style={{ color: '#a6adc8', marginBottom: '2rem' }}>{shop.address} · {shop.email} · {shop.phone}</p>
 
-        <h3 style={{ marginBottom: '1rem' }}>Stock Management</h3>
+        <h3 style={{ marginBottom: '1rem' }}>{t('manageStore.stockManagement')}</h3>
         <form onSubmit={handleAdd} style={formRow}>
-          <input style={input} placeholder="Product ID" value={newProductId} onChange={e => setNewProductId(e.target.value)} />
-          <input style={input} placeholder="Initial stock" value={newStock} onChange={e => setNewStock(e.target.value)} />
-          <button style={btn} type="submit">+ Add Product</button>
+          <input style={input} placeholder={t('manageStore.productIdPlaceholder')} value={newProductId} onChange={e => setNewProductId(e.target.value)} />
+          <input style={input} placeholder={t('manageStore.initialStockPlaceholder')} value={newStock} onChange={e => setNewStock(e.target.value)} />
+          <button style={btn} type="submit">{t('manageStore.addProduct')}</button>
         </form>
 
         <table style={table}>
           <thead>
-            <tr>{['Product ID', 'Stock', 'Update Stock', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('manageStore.colProductId'), t('manageStore.colStock'), t('manageStore.colUpdateStock'), t('manageStore.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {Object.entries(shop.productStock || {}).map(([pid, qty]) => (
@@ -109,20 +111,20 @@ export default function ManageStorePage() {
                 <td style={td}>{pid}</td>
                 <td style={td}>{qty}</td>
                 <td style={td}>
-                  <input style={{ ...input, width: 80 }} placeholder="qty"
+                  <input style={{ ...input, width: 80 }} placeholder={t('manageStore.qtyPlaceholder')}
                     value={stockEdits[pid] ?? ''}
                     onChange={e => setStockEdits(s => ({ ...s, [pid]: e.target.value }))} />
-                  <button style={smallBtn} onClick={() => handleUpdateStock(pid)}>Set</button>
-                  <button style={smallBtn} onClick={() => handleIncrement(pid)}>+1</button>
-                  <button style={smallBtn} onClick={() => handleDecrement(pid)}>-1</button>
+                  <button style={smallBtn} onClick={() => handleUpdateStock(pid)}>{t('manageStore.set')}</button>
+                  <button style={smallBtn} onClick={() => handleIncrement(pid)}>{t('manageStore.increment')}</button>
+                  <button style={smallBtn} onClick={() => handleDecrement(pid)}>{t('manageStore.decrement')}</button>
                 </td>
                 <td style={td}>
-                  <button style={dangerBtn} onClick={() => handleRemove(pid)}>Remove</button>
+                  <button style={dangerBtn} onClick={() => handleRemove(pid)}>{t('manageStore.remove')}</button>
                 </td>
               </tr>
             ))}
             {Object.keys(shop.productStock || {}).length === 0 && (
-              <tr><td colSpan={4} style={{ ...td, color: '#a6adc8', textAlign: 'center' }}>No products yet.</td></tr>
+              <tr><td colSpan={4} style={{ ...td, color: '#a6adc8', textAlign: 'center' }}>{t('manageStore.empty')}</td></tr>
             )}
           </tbody>
         </table>

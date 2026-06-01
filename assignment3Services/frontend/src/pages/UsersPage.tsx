@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAll, getByRole, updateRole, deleteUser, type UserResponse } from '../api/usersApi'
 import Navbar from '../components/Navbar'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -15,6 +16,7 @@ const ROLES = ['ALL', 'USER', 'ADMIN', 'STORE_MANAGER']
 const SORT_FIELDS = ['username', 'email']
 
 export default function UsersPage() {
+  const { t } = useTranslation()
   const [users, setUsers] = useState<UserResponse[]>([])
   const [role, setRole] = useState('ALL')
   const [sortBy, setSortBy] = useState('')
@@ -50,22 +52,22 @@ export default function UsersPage() {
     <div style={page}>
       <Navbar />
       <div style={content}>
-        <h2 style={title}>Users</h2>
+        <h2 style={title}>{t('users.title')}</h2>
         <div style={filterBar}>
           <select style={select} value={role} onChange={e => setRole(e.target.value)}>
             {ROLES.map(r => <option key={r}>{r}</option>)}
           </select>
           <select style={select} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="">No sort</option>
+            <option value="">{t('users.noSort')}</option>
             {SORT_FIELDS.map(f => <option key={f}>{f}</option>)}
           </select>
           <button style={btn} onClick={() => setDirection(d => d === 'asc' ? 'desc' : 'asc')}>
-            {direction === 'asc' ? '↑ ASC' : '↓ DESC'}
+            {direction === 'asc' ? t('users.asc') : t('users.desc')}
           </button>
         </div>
         <table style={table}>
           <thead>
-            <tr>{['ID', 'Username', 'Role', 'Change Role', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('users.colId'), t('users.colUsername'), t('users.colRole'), t('users.colChangeRole'), t('users.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {users.map(u => (
@@ -78,10 +80,10 @@ export default function UsersPage() {
                     onChange={e => setRoleEdits(r => ({ ...r, [u.id]: e.target.value }))}>
                     {['USER', 'ADMIN', 'STORE_MANAGER'].map(r => <option key={r}>{r}</option>)}
                   </select>
-                  <button style={{ ...smallBtn, marginLeft: 6 }} onClick={() => handleRoleChange(u.id)}>Apply</button>
+                  <button style={{ ...smallBtn, marginLeft: 6 }} onClick={() => handleRoleChange(u.id)}>{t('users.apply')}</button>
                 </td>
                 <td style={td}>
-                  <button style={dangerBtn} onClick={() => handleDelete(u.id)}>Delete</button>
+                  <button style={dangerBtn} onClick={() => handleDelete(u.id)}>{t('users.delete')}</button>
                 </td>
               </tr>
             ))}

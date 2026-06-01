@@ -5,6 +5,7 @@ import { getAll as getShops } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
 import { getUserInfo } from '../utils/auth'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -20,6 +21,7 @@ interface AvailableProduct {
 }
 
 export default function UserOrdersPage() {
+  const { t } = useTranslation()
   const [orders, setOrders] = useState<OrderResponse[]>([])
   const [expanded, setExpanded] = useState<number | null>(null)
   const [showCreate, setShowCreate] = useState(false)
@@ -112,26 +114,26 @@ export default function UserOrdersPage() {
       <Navbar />
       <div style={content}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2>My Orders</h2>
+          <h2>{t('orders.myTitle')}</h2>
           {!showCreate
-            ? <button style={btn} onClick={openCreate}>+ New Order</button>
-            : <button style={dangerBtn} onClick={() => setShowCreate(false)}>Cancel</button>}
+            ? <button style={btn} onClick={openCreate}>{t('orders.newOrder')}</button>
+            : <button style={dangerBtn} onClick={() => setShowCreate(false)}>{t('orders.cancel')}</button>}
         </div>
 
         {error && <div style={errorBox}>{error}</div>}
 
         {showCreate && (
           <form onSubmit={handleCreate} style={createForm}>
-            <h3 style={{ marginBottom: '1rem' }}>Select Products</h3>
-            {loadingProducts && <p style={{ color: '#a6adc8' }}>Loading products...</p>}
+            <h3 style={{ marginBottom: '1rem' }}>{t('orders.selectProducts')}</h3>
+            {loadingProducts && <p style={{ color: '#a6adc8' }}>{t('orders.loadingProducts')}</p>}
             {!loadingProducts && availableProducts.length === 0 && (
-              <p style={{ color: '#a6adc8' }}>No products currently in stock.</p>
+              <p style={{ color: '#a6adc8' }}>{t('orders.noProductsInStock')}</p>
             )}
             {!loadingProducts && availableProducts.length > 0 && (
               <>
                 <table style={table}>
                   <thead>
-                    <tr>{['Product', 'Price', 'In Stock', 'Qty'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+                    <tr>{[t('orders.colProduct'), t('orders.colPrice'), t('orders.colInStock'), t('orders.colQty')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
                   </thead>
                   <tbody>
                     {availableProducts.map(({ product, stock }) => (
@@ -158,9 +160,9 @@ export default function UserOrdersPage() {
                   </tbody>
                 </table>
                 <div style={{ margin: '1rem 0', fontWeight: 700, fontSize: 16 }}>
-                  Total: ${total.toFixed(2)}
+                  {t('orders.total')}{total.toFixed(2)}
                 </div>
-                <button style={btn} type="submit">Place Order</button>
+                <button style={btn} type="submit">{t('orders.placeOrder')}</button>
               </>
             )}
           </form>
@@ -168,7 +170,7 @@ export default function UserOrdersPage() {
 
         <table style={table}>
           <thead>
-            <tr>{['Order ID', 'Total', 'Paid', 'Items', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('orders.colOrderId'), t('orders.colTotal'), t('orders.colPaid'), t('orders.colItems'), t('orders.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {orders.map(o => (
@@ -179,15 +181,15 @@ export default function UserOrdersPage() {
                   <td style={td}>{o.isPaid ? '✅' : '❌'}</td>
                   <td style={td}>{o.items?.length ?? 0}</td>
                   <td style={td}>
-                    {!o.isPaid && <button style={smallBtn} onClick={e => handleMarkPaid(o.orderId, e)}>Mark Paid</button>}
-                    <button style={dangerBtn} onClick={e => handleDelete(o.orderId, e)}>Delete</button>
+                    {!o.isPaid && <button style={smallBtn} onClick={e => handleMarkPaid(o.orderId, e)}>{t('orders.markPaid')}</button>}
+                    <button style={dangerBtn} onClick={e => handleDelete(o.orderId, e)}>{t('orders.delete')}</button>
                   </td>
                 </tr>
                 {expanded === o.orderId && (
                   <tr key={`${o.orderId}-items`}>
                     <td colSpan={5} style={{ ...td, background: '#181825' }}>
                       <table style={{ ...table, fontSize: 13 }}>
-                        <thead><tr>{['Item ID', 'Product ID', 'Qty', 'Price/Unit'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                        <thead><tr>{[t('orders.colItemId'), t('orders.colProductId'), t('orders.colQty'), t('orders.colPriceUnit')].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
                         <tbody>
                           {(o.items || []).map(item => (
                             <tr key={item.id}>
@@ -205,7 +207,7 @@ export default function UserOrdersPage() {
               </>
             ))}
             {orders.length === 0 && (
-              <tr><td colSpan={5} style={{ ...td, color: '#a6adc8', textAlign: 'center' }}>No orders yet.</td></tr>
+              <tr><td colSpan={5} style={{ ...td, color: '#a6adc8', textAlign: 'center' }}>{t('orders.empty')}</td></tr>
             )}
           </tbody>
         </table>

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: 'http://localhost:8084' })
+const api = axios.create({ baseURL: '' })
 
 export interface OrderItemResponse {
   id: number
@@ -40,7 +40,7 @@ export const getByUserIdAndIsPaid = (userId: number, isPaid: boolean) =>
 
 export const createOrder = (userId: number, items: OrderItemRequest[]) =>
   api.post('/api/orders', { userId, items })
-
+ 
 export const markAsPaid = (orderId: number) =>
   api.put(`/api/orders/markAsPaid/${orderId}`)
 

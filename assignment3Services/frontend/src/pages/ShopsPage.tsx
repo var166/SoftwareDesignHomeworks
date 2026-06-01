@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getAll, create, deleteShop, type ShopResponse } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -13,11 +14,21 @@ const extractError = (e: unknown): string => {
 }
 
 export default function ShopsPage() {
+  const { t } = useTranslation()
   const [shops, setShops] = useState<ShopResponse[]>([])
   const [sortBy, setSortBy] = useState('')
   const [direction, setDirection] = useState<'asc' | 'desc'>('asc')
   const [form, setForm] = useState({ name: '', address: '', phone: '', email: '', description: '', adminId: '' })
   const navigate = useNavigate()
+
+  const fieldPlaceholders: Record<string, string> = {
+    name: t('shops.namePlaceholder'),
+    address: t('shops.addressPlaceholder'),
+    phone: t('shops.phonePlaceholder'),
+    email: t('shops.emailPlaceholder'),
+    description: t('shops.descriptionPlaceholder'),
+    adminId: t('shops.adminIdPlaceholder'),
+  }
 
   const load = async () => {
     try {
@@ -49,29 +60,29 @@ export default function ShopsPage() {
     <div style={page}>
       <Navbar />
       <div style={content}>
-        <h2 style={title}>Shops</h2>
+        <h2 style={title}>{t('shops.title')}</h2>
 
         <form onSubmit={handleCreate} style={formRow}>
           {(['name', 'address', 'phone', 'email', 'description', 'adminId'] as const).map(f => (
-            <input key={f} style={input} placeholder={f} value={form[f]}
+            <input key={f} style={input} placeholder={fieldPlaceholders[f]} value={form[f]}
               onChange={e => setForm(p => ({ ...p, [f]: e.target.value }))} />
           ))}
-          <button style={btn} type="submit">+ Create</button>
+          <button style={btn} type="submit">{t('shops.create')}</button>
         </form>
 
         <div style={filterBar}>
           <select style={select} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="">No sort</option>
-            <option value="name">Name</option>
+            <option value="">{t('shops.noSort')}</option>
+            <option value="name">{t('shops.sortName')}</option>
           </select>
           <button style={btn} onClick={() => setDirection(d => d === 'asc' ? 'desc' : 'asc')}>
-            {direction === 'asc' ? '↑ ASC' : '↓ DESC'}
+            {direction === 'asc' ? t('shops.asc') : t('shops.desc')}
           </button>
         </div>
 
         <table style={table}>
           <thead>
-            <tr>{['ID', 'Name', 'Address', 'Admin ID', 'Products', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('shops.colId'), t('shops.colName'), t('shops.colAddress'), t('shops.colAdminId'), t('shops.colProducts'), t('shops.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {shops.map(s => (
@@ -80,9 +91,9 @@ export default function ShopsPage() {
                 <td style={td}>{s.name}</td>
                 <td style={td}>{s.address}</td>
                 <td style={td}>{s.adminId}</td>
-                <td style={td}>{Object.keys(s.productStock || {}).length} products</td>
+                <td style={td}>{t('shops.productsCount', { count: Object.keys(s.productStock || {}).length })}</td>
                 <td style={td}>
-                  <button style={dangerBtn} onClick={e => handleDelete(s.id, e)}>Delete</button>
+                  <button style={dangerBtn} onClick={e => handleDelete(s.id, e)}>{t('shops.delete')}</button>
                 </td>
               </tr>
             ))}

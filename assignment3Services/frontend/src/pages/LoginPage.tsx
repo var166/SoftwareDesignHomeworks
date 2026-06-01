@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { login, register, getByUsername } from '../api/usersApi'
 import { setSession } from '../utils/auth'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -26,7 +28,7 @@ export default function LoginPage() {
         else navigate('/my-orders')
       } else {
         await register(username, email, password)
-        alert('Registered successfully! Please log in.')
+        alert(t('auth.registeredSuccess'))
         setMode('login')
         setPassword('')
       }
@@ -41,16 +43,16 @@ export default function LoginPage() {
   return (
     <div style={container}>
       <form onSubmit={handleSubmit} style={card}>
-        <h2 style={{ marginBottom: '1.5rem', color: '#cdd6f4' }}>{mode === 'login' ? 'Login' : 'Register'}</h2>
-        <input style={input} placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required />
+        <h2 style={{ marginBottom: '1.5rem', color: '#cdd6f4' }}>{mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle')}</h2>
+        <input style={input} placeholder={t('auth.username')} value={username} onChange={e => setUsername(e.target.value)} required />
         {mode === 'register' && (
-          <input style={input} placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input style={input} placeholder={t('auth.email')} value={email} onChange={e => setEmail(e.target.value)} required />
         )}
-        <input style={input} placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+        <input style={input} placeholder={t('auth.password')} type="password" value={password} onChange={e => setPassword(e.target.value)} required />
         {error && <p style={{ color: '#f38ba8', fontSize: 13 }}>{error}</p>}
-        <button style={btn} type="submit">{mode === 'login' ? 'Login' : 'Register'}</button>
+        <button style={btn} type="submit">{mode === 'login' ? t('auth.login') : t('auth.register')}</button>
         <button type="button" style={linkBtn} onClick={() => { setMode(m => m === 'login' ? 'register' : 'login'); setError('') }}>
-          {mode === 'login' ? 'No account? Register' : 'Have account? Login'}
+          {mode === 'login' ? t('auth.noAccount') : t('auth.hasAccount')}
         </button>
       </form>
     </div>

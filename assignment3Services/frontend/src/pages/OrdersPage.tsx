@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getAll, getByUserId, getByIsPaid, getByUserIdAndIsPaid, markAsPaid, deleteOrder, type OrderResponse } from '../api/ordersApi'
 import Navbar from '../components/Navbar'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 const extractError = (e: unknown): string => {
   if (axios.isAxiosError(e)) {
@@ -13,6 +14,7 @@ const extractError = (e: unknown): string => {
 }
 
 export default function OrdersPage() {
+  const { t } = useTranslation()
   const [orders, setOrders] = useState<OrderResponse[]>([])
   const [userId, setUserId] = useState('')
   const [isPaidFilter, setIsPaidFilter] = useState<'all' | 'true' | 'false'>('all')
@@ -57,31 +59,31 @@ export default function OrdersPage() {
       <Navbar />
       <div style={content}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2>Orders</h2>
-          <button style={btn} onClick={() => navigate('/orders/create')}>+ New Order</button>
+          <h2>{t('orders.title')}</h2>
+          <button style={btn} onClick={() => navigate('/orders/create')}>{t('orders.newOrder')}</button>
         </div>
 
         <div style={filterBar}>
-          <input style={input} placeholder="User ID" value={userId} onChange={e => setUserId(e.target.value)} />
-          <select style={select} value={isPaidFilter} onChange={e => setIsPaidFilter(e.target.value as any)}>
-            <option value="all">All</option>
-            <option value="true">Paid</option>
-            <option value="false">Unpaid</option>
+          <input style={input} placeholder={t('orders.userId')} value={userId} onChange={e => setUserId(e.target.value)} />
+          <select style={select} value={isPaidFilter} onChange={e => setIsPaidFilter(e.target.value as 'all' | 'true' | 'false')}>
+            <option value="all">{t('orders.all')}</option>
+            <option value="true">{t('orders.paid')}</option>
+            <option value="false">{t('orders.unpaid')}</option>
           </select>
-          <button style={btn} onClick={load}>Filter</button>
+          <button style={btn} onClick={load}>{t('orders.filter')}</button>
           <select style={select} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-            <option value="">No sort</option>
-            <option value="totalPrice">Total Price</option>
-            <option value="orderId">Order ID</option>
+            <option value="">{t('orders.noSort')}</option>
+            <option value="totalPrice">{t('orders.sortTotalPrice')}</option>
+            <option value="orderId">{t('orders.sortOrderId')}</option>
           </select>
           <button style={btn} onClick={() => setDirection(d => d === 'asc' ? 'desc' : 'asc')}>
-            {direction === 'asc' ? '↑ ASC' : '↓ DESC'}
+            {direction === 'asc' ? t('orders.asc') : t('orders.desc')}
           </button>
         </div>
 
         <table style={table}>
           <thead>
-            <tr>{['Order ID', 'User ID', 'Total', 'Paid', 'Items', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('orders.colOrderId'), t('orders.colUserId'), t('orders.colTotal'), t('orders.colPaid'), t('orders.colItems'), t('orders.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {orders.map(o => (
@@ -93,15 +95,15 @@ export default function OrdersPage() {
                   <td style={td}>{o.isPaid ? '✅' : '❌'}</td>
                   <td style={td}>{o.items?.length ?? 0}</td>
                   <td style={td}>
-                    {!o.isPaid && <button style={smallBtn} onClick={e => handleMarkPaid(o.orderId, e)}>Mark Paid</button>}
-                    <button style={dangerBtn} onClick={e => handleDelete(o.orderId, e)}>Delete</button>
+                    {!o.isPaid && <button style={smallBtn} onClick={e => handleMarkPaid(o.orderId, e)}>{t('orders.markPaid')}</button>}
+                    <button style={dangerBtn} onClick={e => handleDelete(o.orderId, e)}>{t('orders.delete')}</button>
                   </td>
                 </tr>
                 {expanded === o.orderId && (
                   <tr key={`${o.orderId}-items`}>
                     <td colSpan={6} style={{ ...td, background: '#181825' }}>
                       <table style={{ ...table, fontSize: 13 }}>
-                        <thead><tr>{['Item ID', 'Product ID', 'Qty', 'Price/Unit'].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
+                        <thead><tr>{[t('orders.colItemId'), t('orders.colProductId'), t('orders.colQty'), t('orders.colPriceUnit')].map(h => <th key={h} style={th}>{h}</th>)}</tr></thead>
                         <tbody>
                           {(o.items || []).map(item => (
                             <tr key={item.id}>

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getById, addProduct, removeProduct, updateStock, incrementStock, decrementStock, type ShopResponse } from '../api/shopsApi'
 import Navbar from '../components/Navbar'
+import { useTranslation } from 'react-i18next'
 
 export default function ShopDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const [shop, setShop] = useState<ShopResponse | null>(null)
   const [newProductId, setNewProductId] = useState('')
@@ -47,7 +49,7 @@ export default function ShopDetailPage() {
     load()
   }
 
-  if (!shop) return <div style={{ color: '#cdd6f4', padding: '2rem' }}>Loading...</div>
+  if (!shop) return <div style={{ color: '#cdd6f4', padding: '2rem' }}>{t('shopDetail.loading')}</div>
 
   return (
     <div style={page}>
@@ -56,16 +58,16 @@ export default function ShopDetailPage() {
         <h2 style={title}>{shop.name}</h2>
         <p style={{ color: '#a6adc8' }}>{shop.address} · {shop.email} · {shop.phone}</p>
 
-        <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>Stock</h3>
+        <h3 style={{ marginTop: '2rem', marginBottom: '1rem' }}>{t('shopDetail.stock')}</h3>
         <form onSubmit={handleAdd} style={formRow}>
-          <input style={input} placeholder="Product ID" value={newProductId} onChange={e => setNewProductId(e.target.value)} />
-          <input style={input} placeholder="Initial stock" value={newStock} onChange={e => setNewStock(e.target.value)} />
-          <button style={btn} type="submit">+ Add Product</button>
+          <input style={input} placeholder={t('shopDetail.productIdPlaceholder')} value={newProductId} onChange={e => setNewProductId(e.target.value)} />
+          <input style={input} placeholder={t('shopDetail.initialStockPlaceholder')} value={newStock} onChange={e => setNewStock(e.target.value)} />
+          <button style={btn} type="submit">{t('shopDetail.addProduct')}</button>
         </form>
 
         <table style={table}>
           <thead>
-            <tr>{['Product ID', 'Stock', 'Update Stock', 'Actions'].map(h => <th key={h} style={th}>{h}</th>)}</tr>
+            <tr>{[t('shopDetail.colProductId'), t('shopDetail.colStock'), t('shopDetail.colUpdateStock'), t('shopDetail.colActions')].map(h => <th key={h} style={th}>{h}</th>)}</tr>
           </thead>
           <tbody>
             {Object.entries(shop.productStock || {}).map(([pid, qty]) => (
@@ -73,15 +75,15 @@ export default function ShopDetailPage() {
                 <td style={td}>{pid}</td>
                 <td style={td}>{qty}</td>
                 <td style={td}>
-                  <input style={{ ...input, width: 80 }} placeholder="qty"
+                  <input style={{ ...input, width: 80 }} placeholder={t('shopDetail.qtyPlaceholder')}
                     value={stockEdits[pid] ?? ''}
                     onChange={e => setStockEdits(s => ({ ...s, [pid]: e.target.value }))} />
-                  <button style={smallBtn} onClick={() => handleUpdateStock(pid)}>Set</button>
-                  <button style={smallBtn} onClick={() => handleIncrement(pid)}>+1</button>
-                  <button style={smallBtn} onClick={() => handleDecrement(pid)}>-1</button>
+                  <button style={smallBtn} onClick={() => handleUpdateStock(pid)}>{t('shopDetail.set')}</button>
+                  <button style={smallBtn} onClick={() => handleIncrement(pid)}>{t('shopDetail.increment')}</button>
+                  <button style={smallBtn} onClick={() => handleDecrement(pid)}>{t('shopDetail.decrement')}</button>
                 </td>
                 <td style={td}>
-                  <button style={dangerBtn} onClick={() => handleRemove(pid)}>Remove</button>
+                  <button style={dangerBtn} onClick={() => handleRemove(pid)}>{t('shopDetail.remove')}</button>
                 </td>
               </tr>
             ))}
