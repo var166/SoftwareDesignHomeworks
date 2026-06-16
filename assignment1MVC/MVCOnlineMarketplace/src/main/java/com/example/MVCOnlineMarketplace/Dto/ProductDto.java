@@ -1,17 +1,22 @@
 package com.example.MVCOnlineMarketplace.Dto;
 
-import com.example.MVCOnlineMarketplace.Model.Product;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Data
 @Builder
-public class ProductDto implements Dto<Product>{
+@AllArgsConstructor
+@NoArgsConstructor
+public class ProductDto {
     private long id;
     private String name;
     private String description;
-    private double price;
-    private int stock;
+    private BigDecimal price;
+    private Long shopId;
 }
 
 
