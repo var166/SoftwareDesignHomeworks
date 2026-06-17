@@ -11,12 +11,11 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDto {
-    private long id;
+public class ProductDocumentDto {
+    private String id;
+    private Long productId;
     private String name;
     private String description;
     private BigDecimal price;
     private Long shopId;
 }
-
-
