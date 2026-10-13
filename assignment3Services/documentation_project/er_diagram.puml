@@ -1,0 +1,70 @@
+@startuml er_diagram
+
+entity "users" {
+    * id : BIGINT <<PK>>
+    --
+    username : VARCHAR <<unique>>
+    email : VARCHAR <<unique>>
+    password : VARCHAR
+    user_role : VARCHAR
+}
+
+entity "shops" {
+    * id : BIGINT <<PK>>
+    --
+    name : VARCHAR <<unique>>
+    address : VARCHAR
+    phone : VARCHAR
+    email : VARCHAR <<unique>>
+    description : VARCHAR
+    admin_id : BIGINT <<FK>>
+}
+
+entity "shop_product_stock" {
+    * shop_id : BIGINT <<FK>>
+    * product_id : BIGINT <<FK>>
+    --
+    stock : INT
+}
+
+entity "products" {
+    * id : BIGINT <<PK>>
+    --
+    name : VARCHAR <<unique>>
+    description : VARCHAR
+    price : DECIMAL(10,2)
+    shop_id : BIGINT <<FK>>
+}
+
+entity "orders" {
+    * order_id : BIGINT <<PK>>
+    --
+    user_id : BIGINT <<FK>>
+    total_price : DECIMAL(10,2)
+    is_paid : BOOLEAN
+}
+
+entity "order_item" {
+    * id : BIGINT <<PK>>
+    --
+    order_id : BIGINT <<FK>>
+    product_id : BIGINT
+    quantity : INT
+    price_per_unit : DECIMAL(10,2)
+}
+
+entity "notifications (MongoDB)" {
+    * _id : ObjectId <<PK>>
+    --
+    type : String
+    payload : Document
+    timestamp : DateTime
+}
+
+users ||--o{ orders : "places"
+orders ||--o{ order_item : "contains"
+shops ||--|{ shop_product_stock : "has"
+products }o--|| shops : "belongs to"
+users ||--o{ shops : "manages (admin_id)"
+
+@enduml

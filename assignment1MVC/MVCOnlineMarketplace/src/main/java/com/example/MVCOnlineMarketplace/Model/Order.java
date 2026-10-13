@@ -2,17 +2,18 @@ package com.example.MVCOnlineMarketplace.Model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "orders")
 public class Order {
     @Id
@@ -24,5 +25,14 @@ public class Order {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(name = "total_price", precision = 10, scale = 2)
+    private BigDecimal totalPrice;
 
+    boolean isPaid;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<OrderItem> orderItems;
+
+    public void setIsPaid(boolean isPaid) {
+        this.isPaid = isPaid;
+    }
 }

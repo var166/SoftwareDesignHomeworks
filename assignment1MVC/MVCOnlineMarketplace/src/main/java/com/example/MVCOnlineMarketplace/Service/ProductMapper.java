@@ -2,7 +2,10 @@ package com.example.MVCOnlineMarketplace.Service;
 
 import com.example.MVCOnlineMarketplace.Dto.ProductDto;
 import com.example.MVCOnlineMarketplace.Model.Product;
+import org.springframework.stereotype.Component;
 
+
+@Component
 public class ProductMapper {
     public static ProductDto mapToProductDto(Product product){
         return ProductDto.builder()
@@ -10,6 +13,7 @@ public class ProductMapper {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .shopId(product.getShop() != null ? product.getShop().getId() : null)
                 .build();
     }
     public static Product mapFromProductDto(ProductDto productDto){
@@ -17,7 +21,7 @@ public class ProductMapper {
                 .name(productDto.getName())
                 .description(productDto.getDescription())
                 .price(productDto.getPrice())
-                .stock(productDto.getStock())
+
                 .build();
     }
 }

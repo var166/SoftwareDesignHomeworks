@@ -1,9 +1,12 @@
 package com.example.MVCOnlineMarketplace.Repositories;
 
 import com.example.MVCOnlineMarketplace.Model.Product;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ProductRepository extends Repository<Product>{
-    public List<Product> findByUser();
+@Repository
+public interface ProductRepository extends JpaRepository<Product, Long> {
+    List<Product> findByShop_Id(long shopId);
 }

@@ -1,0 +1,88 @@
+@startuml class_diagram
+
+enum UserRole {
+    USER
+    STORE_MANAGER
+    ADMIN
+}
+
+class User {
+    - id : long
+    - username : String
+    - email : String
+    - password : String
+    - userRole : UserRole
+}
+
+class Shop {
+    - id : long
+    - name : String
+    - address : String
+    - phone : String
+    - email : String
+    - description : String
+    - adminId : Long
+    - productStock : Map<Long, Integer>
+}
+
+class Product {
+    - id : long
+    - name : String
+    - description : String
+    - price : BigDecimal
+    - shopId : Long
+}
+
+class Order {
+    - orderId : long
+    - userId : Long
+    - totalPrice : BigDecimal
+    - isPaid : boolean
+    - orderItems : List<OrderItem>
+}
+
+class OrderItem {
+    - id : long
+    - productId : Long
+    - quantity : int
+    - pricePerUnit : BigDecimal
+}
+
+class DomainEvent {
+    - eventType : String
+    - payload : Object
+    - timestamp : Instant
+}
+
+interface IProductCommandService {
+    + create(name, desc, price, shopId, email) : Product
+    + updatePrice(id, price, email) : boolean
+    + updateDescription(id, desc, email) : boolean
+    + delete(id) : boolean
+}
+
+interface IOrderCommandService {
+    + createOrder(userId, items) : Order
+    + markAsPaid(orderId) : boolean
+    + deleteOrder(orderId) : boolean
+    + addItem(orderId, item) : OrderItem
+    + removeItem(itemId) : boolean
+}
+
+interface IShopCommandService {
+    + create(name, addr, phone, email, desc, adminId) : Shop
+    + addProduct(shopId, productId, stock) : void
+    + removeProduct(shopId, productId) : void
+    + updateStock(shopId, productId, qty) : void
+    + deleteShop(id) : boolean
+}
+
+User --> UserRole
+Order "1" *-- "many" OrderItem
+Order --> User : userId
+Product --> Shop : shopId
+Shop --> User : adminId
+IProductCommandService ..> DomainEvent : publishes
+IOrderCommandService ..> DomainEvent : publishes
+
+@enduml
